@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air Quality & Weather Monitor</title>
+    <meta name="description" content="Air Quality & Weather Monitor  — Live air quality (AQI), hourly forecasts, pollutant levels, and health guidance worldwide.">
+    <meta property="og:title" content="Air Quality & Weather Monitor ">
+    <meta property="og:description" content="Live AQI, hourly forecasts, pollutant levels, and health recommendations.">
+    <meta property="og:type" content="website">
+    <!-- Favicon (inline SVG for portability) -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1'%3E%3Cstop offset='0' stop-color='%23667eea'/%3E%3Cstop offset='1' stop-color='%23764ba2'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='18' fill='url(%23g)'/%3E%3Ctext x='50' y='57' font-family='DejaVu Sans, Arial, sans-serif' font-size='46' text-anchor='middle' fill='%23fff' font-weight='700'%3EAQ%3C/text%3E%3C/svg%3E" sizes="32x32">
+    <!-- Apple touch icon -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%23667eea'/%3E%3Ctext x='50' y='57' font-family='DejaVu Sans, Arial, sans-serif' font-size='46' text-anchor='middle' fill='%23fff' font-weight='700'%3EAQ%3C/text%3E%3C/svg%3E">
+    <!-- Open Graph / Twitter cards (prefer PNG if generated; fallback to SVG) -->
+    <meta property="og:image" content="/og-image.png">
+    <meta property="og:image" content="/og-image.svg">
+    <meta property="og:image:alt" content="Air Quality & Weather Monitor">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Air Quality & Weather Monitor ">
+    <meta name="twitter:description" content="Live AQI, hourly forecasts, pollutant levels, and health guidance worldwide.">
+    <meta name="twitter:image" content="/og-image.png">
+    <meta name="twitter:image" content="/og-image.svg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; 
+            color: #333;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; color: white; margin-bottom: 30px; animation: slideDown 0.6s ease; }
+        /* Accessibility & focus */
+        .skip-link { position: absolute; left: -999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+        .skip-link:focus { left: 20px; top: 20px; width: auto; height: auto; padding: 8px 12px; background: #fff; color: #333; z-index: 9999; border-radius: 6px; box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
+        :focus-visible { outline: 3px solid #ffcc00; outline-offset: 2px; }
+        .metric-label { color: #444; }
+        .metric-value { color: #111; }
+        .header h1 { font-size: 2.8rem; margin-bottom: 6px; text-shadow: 0 2px 10px rgba(0,0,0,0.25); letter-spacing: 0.6px; font-weight: 800; }
+        .header p { font-size: 1rem; opacity: 0.92; color: rgba(255,255,255,0.95); margin-top: 4px; }
+        .search-box { 
+            display: flex; gap: 10px; max-width: 600px; margin: 0 auto 20px; flex-wrap: wrap;
+            background: white; padding: 15px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: slideUp 0.6s ease; justify-content: center;
+        }
+        label { display: none; }
+        input[type="text"] { flex: 1; min-width: 200px; padding: 12px 16px; border: 2px solid #eee; font-size: 16px; outline: none; border-radius: 8px; transition: border 200ms; }
+        input[type="text"]:focus { border-color: #667eea; }
+        button { padding: 12px 20px; background: #4CAF50; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 200ms; }
+        button:hover { background: #45a049; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3); }
+        button:active { transform: translateY(0); }
+        .location-btn { background: #2196F3; position: fixed; top: 20px; left: 20px; z-index: 100; width: 36px; height: 36px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; }
+        .location-btn:hover { background: #1976D2; box-shadow: 0 6px 18px rgba(33, 150, 243, 0.25); transform: translateY(-2px); }
+        .settings-btn { background: #FF9800; width: 36px; height: 36px; padding: 0; border-radius: 50%; position: fixed; top: 20px; right: 20px; z-index: 100; display: flex; align-items: center; justify-content: center; color: #fff; }
+        .settings-btn:hover { background: #F57C00; box-shadow: 0 6px 18px rgba(255, 152, 0, 0.25); transform: translateY(-2px); }
+        .current-weather, .air-quality, .forecast, .hourly, .pollutants, .health-tips { 
+            background: white; margin: 20px 0; padding: 30px; border-radius: 16px; box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            animation: fadeIn 0.8s ease;
+        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .location-display { font-size: 28px; font-weight: 700; margin-bottom: 20px; text-align: center; color: #333; }
+        .location-coords { font-size: 14px; color: #666; font-weight: 600; margin-top: 6px; text-align: center; }
+        .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 20px; margin: 20px 0; }
+        .metric-card { text-align: center; padding: 25px 20px; background: linear-gradient(135deg, #f8f9ff 0%, #f0f1ff 100%); border-radius: 12px; border-left: 4px solid #667eea; transition: all 200ms; }
+        .metric-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15); }
+        .metric-value { font-size: 32px; font-weight: 700; color: #333; margin: 10px 0; }
+        .metric-label { color: #666; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .aqi-circle { width: 160px; height: 160px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 48px; font-weight: 700; color: white; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .aqi-good { background: linear-gradient(135deg, #4CAF50, #45a049); }
+        .aqi-moderate { background: linear-gradient(135deg, #FF9800, #F57C00); }
+        .aqi-unhealthy { background: linear-gradient(135deg, #F44336, #E53935); }
+        .aqi-very { background: linear-gradient(135deg, #9C27B0, #8E24AA); }
+        .aqi-hazardous { background: linear-gradient(135deg, #1a1a1a, #424242); }
+        .aqi-section { text-align: center; }
+        .aqi-value { font-size: 40px; font-weight: 700; color: #333; }
+        .aqi-category { font-size: 18px; font-weight: 600; color: #666; margin-top: 10px; }
+        .pm-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 20px; }
+        .pm-item { background: #f5f5f5; padding: 15px; border-radius: 10px; border-left: 4px solid #667eea; }
+        .pm-value { font-size: 24px; font-weight: 700; color: #333; }
+        .pm-label { font-size: 12px; color: #666; text-transform: uppercase; margin-top: 5px; }
+        .aqi-legend { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 25px; }
+        .legend-item { display: flex; align-items: center; gap: 10px; padding: 10px 15px; background: #f8f9ff; border-radius: 8px; font-size: 14px; color: #333; transition: all 200ms; }
+        .legend-item.active { transform: scale(1.08); box-shadow: 0 6px 16px rgba(102, 126, 234, 0.25); background: #667eea; color: white; font-weight: 700; }
+        .legend-swatch { width: 20px; height: 20px; border-radius: 4px; display: inline-block; }
+        .legend-good { background: #4CAF50; }
+        .legend-moderate { background: #FF9800; }
+        .legend-unhealthy { background: #F44336; }
+        .legend-very { background: #9C27B0; }
+        .legend-hazardous { background: #1a1a1a; }
+        h2 { text-align: center; margin-bottom: 20px; color: #333; font-size: 24px; font-weight: 700; }
+        .forecast-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 15px; }
+        .forecast-day { text-align: center; padding: 15px; background: linear-gradient(135deg, #f8f9ff 0%, #f0f1ff 100%); border-radius: 10px; transition: all 200ms; }
+        .forecast-day:hover { transform: translateY(-4px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+        .day-name { font-weight: 700; margin-bottom: 10px; color: #333; }
+        .forecast-icon { font-size: 32px; margin: 10px 0; }
+        .temp-range { font-size: 18px; font-weight: 700; color: #333; }
+        .precip { color: #666; font-size: 12px; margin-top: 5px; }
+        .hourly-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 15px 0; scroll-behavior: smooth; }
+        .hourly-item { min-width: 100px; text-align: center; padding: 12px; background: linear-gradient(135deg, #f8f9ff 0%, #f0f1ff 100%); border-radius: 10px; transition: all 200ms; }
+        .hourly-item:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .hourly-time { font-size: 12px; font-weight: 600; color: #666; }
+        .hourly-temp { font-size: 18px; font-weight: 700; color: #333; margin: 5px 0; }
+        .hourly-icon { font-size: 24px; margin: 5px 0; }
+        .pollutant-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+        .pollutant-card { background: linear-gradient(135deg, #f8f9ff 0%, #f0f1ff 100%); padding: 20px; border-radius: 10px; border-left: 4px solid #667eea; transition: all 200ms; }
+        .pollutant-card:hover { transform: translateY(-4px); box-shadow: 0 6px 16px rgba(102, 126, 234, 0.15); }
+        .pollutant-name { font-weight: 700; color: #333; margin-bottom: 8px; }
+        .pollutant-value { font-size: 24px; font-weight: 700; color: #667eea; }
+        .pollutant-unit { font-size: 12px; color: #666; }
+        .health-tips-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+        .tip-card { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); padding: 20px; border-radius: 10px; border-left: 4px solid #FF9800; }
+        .tip-icon { font-size: 28px; margin-bottom: 10px; }
+        .tip-title { font-weight: 700; color: #333; margin-bottom: 8px; }
+        .tip-text { font-size: 14px; color: #555; line-height: 1.6; }
+        .loading { text-align: center; padding: 40px; font-size: 18px; color: white; }
+        .error { background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); color: #c62828; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center; font-weight: 600; border-left: 4px solid #c62828; }
+        .settings-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 999; animation: fadeIn 0.3s ease; }
+        .settings-panel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); padding: 40px; z-index: 1000; min-width: 350px; max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s ease; }
+        .settings-panel h3 { margin-bottom: 20px; color: #333; font-size: 24px; font-weight: 700; }
+        .settings-group { margin: 20px 0; }
+        .settings-group label { display: block; font-weight: 700; margin-bottom: 8px; color: #333; }
+        .settings-group select, .settings-group input { padding: 10px; border: 2px solid #eee; border-radius: 8px; font-size: 14px; width: 100%; transition: border 200ms; }
+        .settings-group select:focus, .settings-group input:focus { border-color: #667eea; outline: none; }
+        .settings-buttons { margin-top: 25px; display: flex; gap: 10px; }
+        .settings-buttons button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; transition: all 200ms; }
+        .btn-save { background: #4CAF50; color: white; }
+        .btn-save:hover { background: #45a049; transform: translateY(-2px); }
+        .btn-cancel { background: #ccc; color: #333; }
+        .btn-cancel:hover { background: #bbb; }
+        @media (max-width: 768px) { 
+            .header h1 { font-size: 1.8rem; } 
+            .search-box { flex-direction: column; } 
+            input[type="text"] { min-width: 100%; } 
+            .metric-grid { grid-template-columns: repeat(2, 1fr); } 
+            .aqi-circle { width: 120px; height: 120px; font-size: 36px; } 
+            .metric-value { font-size: 24px; }
+            .settings-panel { min-width: 90%; padding: 30px; }
+        }
+        .scroll-indicator { text-align: center; margin-top: 10px; font-size: 12px; color: #999; }
+
+        /* Top two-column layout: left = compact metrics, right = health tips
+           Make both columns equal width and equal height (responsive) */
+        .top-row { display: flex; gap: 20px; align-items: stretch; margin-bottom: 20px; }
+        .left-panel, .right-panel { flex: 1 1 0; min-width: 0; }
+        .left-panel { max-width: none; }
+        .right-panel { max-width: none; }
+
+        /* Make the metric grid compact and stacked vertically */
+        .left-panel .metric-grid { display: flex; flex-direction: column; gap: 12px; }
+        .left-panel .metric-card { padding: 14px 12px; display: flex; flex-direction: column; justify-content: center; }
+        .left-panel .metric-value { font-size: 22px; }
+
+        /* Ensure both panels stretch to same height and content flows */
+        .top-row > .left-panel > .current-weather,
+        .top-row > .right-panel > .health-tips { display: flex; flex-direction: column; height: 100%; }
+        .top-row > .left-panel > .current-weather .metric-grid { flex: 1; }
+        .top-row > .right-panel > .health-tips .health-tips-list { flex: 1; overflow: auto; }
+
+        .right-panel .health-tips { position: sticky; top: 100px; }
+
+        @media (max-width: 768px) { 
+            .top-row { flex-direction: column; }
+            .right-panel { width: 100%; }
+        }
+
+        .tip-toggle { background: transparent; border: none; color: #333; font-weight: 700; margin-left: 8px; cursor: pointer; padding: 2px 6px; border-radius: 6px; }
+        .tip-toggle:hover { background: rgba(0,0,0,0.06); }
+
+        /* Icon buttons: ensure SVG icons are sized and visible */
+        .settings-btn svg, .location-btn svg, svg.icon { width: 18px; height: 18px; fill: currentColor; display:inline-block; }
+        .location-btn:focus, .settings-btn:focus { outline: 3px solid rgba(255,255,255,0.9); outline-offset: 3px; }
+        .settings-btn:focus svg, .location-btn:focus svg { outline: none; }
+    </style>
+</head>
+<body>
+    <a href="#content" class="skip-link">Skip to content</a>
+    <!-- SVG icon sprite: accessible, re-usable inline symbols -->
+    <!--
+        Usage: add additional icons as <symbol id="icon-you">...</symbol> and reference with:
+        <svg class="icon" aria-hidden="true"><use href="#icon-you" xlink:href="#icon-you"></use></svg>
+        The buttons use `aria-label` for screen-reader accessible names; icons are aria-hidden to prevent duplicate announcement.
+    -->
+    <svg aria-hidden="true" focusable="false" xmlns:xlink="http://www.w3.org/1999/xlink" style="display:none;">
+        <symbol id="icon-location" viewBox="0 0 24 24">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" />
+        </symbol>
+        <symbol id="icon-settings" viewBox="0 0 24 24">
+            <path d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.63l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.028 7.028 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 14 2h-4a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.14.55-1.63.94L5.12 5.96a.5.5 0 0 0-.6.22L2.6 9.5a.5.5 0 0 0 .12.63L4.75 11.7c-.04.31-.06.63-.06.94s.02.63.06.94L2.72 15.16a.5.5 0 0 0-.12.63l1.92 3.32c.14.24.44.34.7.22l2.39-.96c.49.39 1.04.7 1.63.94l.36 2.54c.05.25.26.42.5.42h4c.24 0 .45-.17.5-.42l.36-2.54c.59-.24 1.14-.55 1.63-.94l2.39.96c.26.11.56.02.7-.22l1.92-3.32a.5.5 0 0 0-.12-.63l-2.03-1.58zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z" />
+        </symbol>
+    </svg>
+    <div class="container">
+        <!-- Aria-live region for updates (visually hidden but accessible to screen readers) -->
+        <div id="statusAnnounce" role="status" aria-live="polite" style="position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden;"></div>
+            <div class="header">
+            <h1>🌍 Air Quality & Weather Monitor</h1>
+            <p>Live AQI, hourly forecasts & health guidance worldwide</p>
+                <div style="margin-top:8px; display:flex; gap:12px; justify-content:center; align-items:center;">
+                <div id="lastUpdated" aria-live="polite" style="color: rgba(255,255,255,0.9); font-size:0.95rem;">Last updated: —</div>
+                <div id="fetchInfo" style="color: rgba(255,255,255,0.9); font-size:0.85rem;">Weather: — · AQI: —</div>
+                <button id="refreshBtn" title="Refresh now" aria-label="Refresh data" style="padding:8px 12px; border-radius:8px; background:#fff;color:#333;font-weight:700;">⟳ Refresh</button>
+            </div>
+        </div>
+        
+        <div class="search-box">
+            <label for="cityInput">City</label>
+            <input type="text" id="cityInput" placeholder="Enter city name (e.g., Delhi, New York, Tokyo)" value="Delhi" aria-label="City name">
+            <button id="searchBtn" title="Search by city">Search</button>
+            <button class="location-btn" id="locBtn" title="Use your current location" aria-label="Use my location">
+                <svg class="icon" aria-hidden="true" focusable="false" role="img"><use href="#icon-location" xlink:href="#icon-location"></use></svg>
+            </button>
+            <button class="settings-btn" id="settingsBtn" title="Open settings" aria-label="Open settings">
+                <svg class="icon" aria-hidden="true" focusable="false" role="img"><use href="#icon-settings" xlink:href="#icon-settings"></use></svg>
+            </button>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;" role="status" aria-live="polite">⏳ Loading weather & air quality data...</div>
+        <div id="error" style="display: none;"></div>
+        
+        <div id="content" style="display: none;">
+            <div class="top-row">
+                <div class="left-panel">
+                    <div class="current-weather">
+                        <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
+                            <div class="location-display" id="locationDisplay"></div>
+                            <button id="revGeoToggle" class="revgeo-toggle" aria-expanded="false" title="Show reverse-geocode debug">Show geocode</button>
+                        </div>
+                        <div id="locationCoords" class="location-coords" aria-hidden="true"></div>
+                        <div id="revGeoDebug" class="revgeo-debug" aria-hidden="true"></div>
+                        <div class="metric-grid">
+                            <div class="metric-card">
+                                <div class="metric-label">🌡️ Temperature</div>
+                                <div id="tempValue" class="metric-value"></div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">💧 Humidity</div>
+                                <div id="humidityValue" class="metric-value"></div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">💨 Wind Speed</div>
+                                <div id="windValue" class="metric-value"></div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">🌥️ Condition</div>
+                                <div id="weatherDesc" class="metric-value" style="font-size: 20px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <div class="right-panel">
+                <div class="health-tips">
+                    <h2>💡 Health Recommendations <button id="toggleTips" class="tip-toggle" aria-expanded="true" aria-controls="healthTipsContainer" title="Hide health tips">–</button></h2>
+                    <div id="healthTipsContainer" class="health-tips-list"></div>
+                </div>
+            </div>
+            </div>
+
+            <div class="air-quality">
+                <h2>🌫️ Air Quality Index (AQI)</h2>
+                <div class="aqi-section">
+                    <div id="aqiCircle" class="aqi-circle"></div>
+                    <div id="aqiValue" class="aqi-value"></div>
+                    <div id="aqiCategory" class="aqi-category"></div>
+                    
+                    <div class="pm-details">
+                        <div class="pm-item">
+                            <div class="pm-label">PM2.5</div>
+                            <div id="pm25Value" class="pm-value"></div>
+                        </div>
+                        <div class="pm-item">
+                            <div class="pm-label">PM10</div>
+                            <div id="pm10Value" class="pm-value"></div>
+                        </div>
+                    </div>
+
+                    <div id="aqiLegend" class="aqi-legend" aria-label="AQI legend"></div>
+                </div>
+            </div>
+
+            <div class="pollutants">
+                <h2>🔬 Pollutant Levels</h2>
+                <div id="pollutantGrid" class="pollutant-grid"></div>
+            </div>
+
+            <div class="hourly">
+                <h2>⏰ Hourly Forecast (Next 24H)</h2>
+                <div id="hourlyGrid" class="hourly-scroll"></div>
+                <div class="scroll-indicator">← Scroll to see more →</div>
+            </div>
+
+            <div class="forecast">
+                <h2>📅 7-Day Forecast</h2>
+                <div id="forecastGrid" class="forecast-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="settingsOverlay" class="settings-overlay" onclick="closeSettings();"></div>
+    <div id="settingsPanel" class="settings-panel">
+        <h3>⚙️ Settings</h3>
+        <div class="settings-group">
+            <label for="unitSelect">Temperature Unit:</label>
+            <select id="unitSelect">
+                <option value="C">Celsius (°C)</option>
+                <option value="F">Fahrenheit (°F)</option>
+            </select>
+        </div>
+        <div class="settings-group">
+            <label for="refreshSelect">Auto-Refresh Interval:</label>
+            <select id="refreshSelect">
+                <option value="300000">5 minutes</option>
+                <option value="600000">10 minutes</option>
+                <option value="900000">15 minutes</option>
+                <option value="0">Disabled</option>
+            </select>
+        </div>
+        <div class="settings-group">
+            <label for="themeSelect">Theme:</label>
+            <select id="themeSelect">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+            </select>
+        </div>
+        <div class="settings-buttons">
+            <button class="btn-save" onclick="saveSettings()">✓ Save</button>
+            <button class="btn-cancel" onclick="closeSettings()">✕ Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        const WEATHER_API = 'https://api.open-meteo.com/v1/forecast';
+        const AQI_API = 'https://air-quality-api.open-meteo.com/v1/air-quality';
+
+        let currentLat = null, currentLon = null;
+        let lastWeatherTs = null, lastAqiTs = null;
+        let lastWeatherFromCache = false, lastAqiFromCache = false;
+        let tempUnit = 'C', autoRefreshInterval = 300000, theme = 'light';
+        let refreshIntervalId = null;
+
+        const aqiCategories = [
+            { range: [0, 50], label: 'Good', color: 'aqi-good' },
+            { range: [51, 100], label: 'Moderate', color: 'aqi-moderate' },
+            { range: [101, 150], label: 'Unhealthy for Sensitive Groups', color: 'aqi-unhealthy' },
+            { range: [151, 200], label: 'Unhealthy', color: 'aqi-very' },
+            { range: [201, 300], label: 'Very Unhealthy', color: 'aqi-very' },
+            { range: [301, 500], label: 'Hazardous', color: 'aqi-hazardous' }
+        ];
+
+        const pollutantThresholds = {
+            'NO2': { safe: 40, caution: 100, danger: 200 },
+            'O3': { safe: 100, caution: 160, danger: 240 },
+            'SO2': { safe: 100, caution: 350, danger: 500 }
+        };
+
+        function getAqiCategory(aqi) {
+            for (let cat of aqiCategories) {
+                if (aqi >= cat.range[0] && aqi <= cat.range[1]) return cat;
+            }
+            return aqiCategories[0];
+        }
+
+        /* Return the index of the nearest hourly data to the current time or current_weather time.
+           This ensures we display the value closest to 'now' rather than always the first hourly item. */
+        function getCurrentHourIndex(weather) {
+            if (!weather || !weather.hourly || !weather.hourly.time || !weather.current_weather) return 0;
+            const times = weather.hourly.time;
+            const nowIso = weather.current_weather.time || new Date().toISOString();
+            // If there's an exact match, return it
+            const idxExact = times.findIndex(t => t === nowIso);
+            if (idxExact >= 0) return idxExact;
+
+            // Otherwise, find the closest hour by absolute time difference
+            const target = new Date(nowIso).getTime();
+            let bestIdx = 0;
+            let bestDelta = Infinity;
+            for (let i = 0; i < times.length; i++) {
+                const tms = Date.parse(times[i]);
+                const delta = Math.abs(tms - target);
+                if (delta < bestDelta) { bestDelta = delta; bestIdx = i; }
+            }
+            return bestIdx;
+        }
+
+        function pm25ToAqi(pm25) {
+            if (pm25 === null || pm25 === undefined || isNaN(pm25)) return null;
+            const breakpoints = [
+                { cLow: 0.0, cHigh: 12.0, iLow: 0, iHigh: 50 },
+                { cLow: 12.1, cHigh: 35.4, iLow: 51, iHigh: 100 },
+                { cLow: 35.5, cHigh: 55.4, iLow: 101, iHigh: 150 },
+                { cLow: 55.5, cHigh: 150.4, iLow: 151, iHigh: 200 },
+                { cLow: 150.5, cHigh: 250.4, iLow: 201, iHigh: 300 },
+                { cLow: 250.5, cHigh: 350.4, iLow: 301, iHigh: 400 },
+                { cLow: 350.5, cHigh: 500.4, iLow: 401, iHigh: 500 }
+            ];
+            for (let bp of breakpoints) {
+                if (pm25 >= bp.cLow && pm25 <= bp.cHigh) {
+                    const aqi = ((bp.iHigh - bp.iLow) / (bp.cHigh - bp.cLow)) * (pm25 - bp.cLow) + bp.iLow;
+                    return Math.round(aqi);
+                }
+            }
+            return null;
+        }
+
+        function debounce(fn, wait) {
+            let t = null;
+            return function(...args) {
+                clearTimeout(t);
+                t = setTimeout(() => fn.apply(this, args), wait);
+            };
+        }
+
+        function loadGeocodeCache(city) {
+            try {
+                const key = `geoCache_${city.toLowerCase()}`;
+                const raw = localStorage.getItem(key);
+                if (!raw) return null;
+                const obj = JSON.parse(raw);
+                if (Date.now() - obj.ts > 24 * 60 * 60 * 1000) { localStorage.removeItem(key); return null; }
+                return obj.data;
+            } catch (e) { return null; }
+        }
+
+        function saveGeocodeCache(city, data) {
+            try {
+                const key = `geoCache_${city.toLowerCase()}`;
+                localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
+            } catch (e) { }
+        }
+
+        function loadResponseCache(key) {
+            try {
+                const raw = localStorage.getItem(`apiCache_${key}`);
+                if (!raw) return null;
+                const obj = JSON.parse(raw);
+                if (Date.now() - obj.ts > 5 * 60 * 1000) { localStorage.removeItem(`apiCache_${key}`); return null; }
+                return obj.data;
+            } catch (e) { return null; }
+        }
+
+        function saveResponseCache(key, data) {
+            try {
+                localStorage.setItem(`apiCache_${key}`, JSON.stringify({ ts: Date.now(), data }));
+            } catch (e) { }
+        }
+
+        function getResponseCacheInfo(key) {
+            try {
+                const raw = localStorage.getItem(`apiCache_${key}`);
+                if (!raw) return null;
+                const obj = JSON.parse(raw);
+                if (!obj || !obj.ts) return null;
+                return { ts: obj.ts, data: obj.data };
+            } catch (e) { return null; }
+        }
+
+        function formatTs(ts) {
+            if (!ts) return '—';
+            try { return new Date(ts).toLocaleString(); } catch(e) { return '—'; }
+        }
+
+        function updateFetchInfoDisplay() {
+            const el = document.getElementById('fetchInfo');
+            if (!el) return;
+            const wText = lastWeatherTs ? `${formatTs(lastWeatherTs)}${lastWeatherFromCache ? ' (cached)' : ''}` : '—';
+            const aText = lastAqiTs ? `${formatTs(lastAqiTs)}${lastAqiFromCache ? ' (cached)' : ''}` : '—';
+            el.textContent = `Weather: ${wText} · AQI: ${aText}`;
+        }
+
+        function convertTemp(celsius) {
+            if (tempUnit === 'F') return Math.round((celsius * 9/5) + 32);
+            return Math.round(celsius);
+        }
+
+        function formatPlaceName(r) {
+            if (!r) return '';
+            // Common fields returned by reverse geocoding: name, locality, city, town, village, admin1, admin2, country
+            const prefer = [];
+            // Try locality / neighbourhood first
+            if (r.locality) prefer.push(r.locality);
+            // city / town / village
+            if (r.city) prefer.push(r.city);
+            if (r.town) prefer.push(r.town);
+            if (r.village) prefer.push(r.village);
+            // name (often the place or point-of-interest)
+            if (r.name) prefer.push(r.name);
+            // administrative regions
+            if (r.admin1) prefer.push(r.admin1);
+            if (r.admin2) prefer.push(r.admin2);
+            // country
+            if (r.country) prefer.push(r.country);
+
+            // fallback: try to build from available parts and remove duplicates
+            const parts = prefer.filter(Boolean);
+            const unique = parts.filter((v, i, a) => a.indexOf(v) === i);
+            // If we still have nothing useful, try the raw display_name or name
+            if (unique.length === 0) {
+                if (r.display_name) return r.display_name;
+                if (r.name) return r.name;
+                return '';
+            }
+            return unique.join(', ');
+        }
+
+        function getTempUnit() { return tempUnit === 'F' ? '°F' : '°C'; }
+
+        function renderLegend() {
+            const legendEl = document.getElementById('aqiLegend');
+            legendEl.innerHTML = '';
+            const colorMap = { 'aqi-good': 'legend-good', 'aqi-moderate': 'legend-moderate', 'aqi-unhealthy': 'legend-unhealthy', 'aqi-very': 'legend-very', 'aqi-hazardous': 'legend-hazardous' };
+            aqiCategories.forEach(cat => {
+                const div = document.createElement('div');
+                div.className = 'legend-item';
+                div.dataset.range = cat.range.join('-');
+                const swatch = document.createElement('span');
+                swatch.className = `legend-swatch ${colorMap[cat.color] || 'legend-good'}`;
+                const text = document.createElement('span');
+                text.textContent = `${cat.range[0]}–${cat.range[1]} ${cat.label}`;
+                div.appendChild(swatch);
+                div.appendChild(text);
+                legendEl.appendChild(div);
+            });
+        }
+
+        function highlightLegend(aqi) {
+            const items = document.querySelectorAll('.aqi-legend .legend-item');
+            items.forEach(it => it.classList.remove('active'));
+            if (typeof aqi !== 'number') return;
+            for (const it of items) {
+                const [low, high] = (it.dataset.range || '').split('-').map(Number);
+                if (!isNaN(low) && !isNaN(high) && aqi >= low && aqi <= high) {
+                    it.classList.add('active');
+                    return;
+                }
+            }
+        }
+
+        function getHealthTips(aqi) {
+            const tips = [];
+            if (aqi <= 50) {
+                tips.push({ icon: '✅', title: 'Air Quality Good', text: 'Perfect day for outdoor activities! Enjoy your time outside.' });
+            } else if (aqi <= 100) {
+                tips.push({ icon: '⚠️', title: 'Moderate Air Quality', text: 'Sensitive groups should limit prolonged outdoor exertion.' });
+            } else if (aqi <= 150) {
+                tips.push({ icon: '⚠️', title: 'Unhealthy for Sensitive Groups', text: 'Sensitive groups should reduce outdoor activities. Consider wearing a mask.' });
+            } else if (aqi <= 200) {
+                tips.push({ icon: '🚫', title: 'Unhealthy', text: 'Everyone should limit outdoor activities. Wear an N95 mask if going outside.' });
+            } else {
+                tips.push({ icon: '🚨', title: 'Very Unhealthy / Hazardous', text: 'Avoid outdoor activities. Stay indoors with air purifiers if possible.' });
+            }
+            return tips;
+        }
+
+        function renderHealthTips(aqi) {
+            const container = document.getElementById('healthTipsContainer');
+            container.innerHTML = '';
+            const tips = getHealthTips(aqi);
+            tips.forEach(tip => {
+                const card = document.createElement('div');
+                card.className = 'tip-card';
+                card.innerHTML = `<div class="tip-icon">${tip.icon}</div><div class="tip-title">${tip.title}</div><div class="tip-text">${tip.text}</div>`;
+                container.appendChild(card);
+            });
+        }
+
+        // Toggle for health tips (useful on small screens)
+        function toggleHealthTips() {
+            const btn = document.getElementById('toggleTips');
+            const container = document.getElementById('healthTipsContainer');
+            const expanded = btn.getAttribute('aria-expanded') === 'true';
+            if (expanded) {
+                container.style.display = 'none';
+                btn.setAttribute('aria-expanded', 'false');
+                btn.textContent = '+';
+                btn.title = 'Show health tips';
+            } else {
+                container.style.display = '';
+                btn.setAttribute('aria-expanded', 'true');
+                btn.textContent = '–';
+                btn.title = 'Hide health tips';
+            }
+        }
+
+        function renderPollutants(aqiData, idx = 0) {
+            const grid = document.getElementById('pollutantGrid');
+            grid.innerHTML = '';
+            const pollutants = {
+                'NO2': aqiData?.hourly?.nitrogen_dioxide ? aqiData.hourly.nitrogen_dioxide[idx] ?? aqiData.hourly.nitrogen_dioxide[0] : null,
+                'O3': aqiData?.hourly?.ozone ? aqiData.hourly.ozone[idx] ?? aqiData.hourly.ozone[0] : null,
+                'SO2': aqiData?.hourly?.sulphur_dioxide ? aqiData.hourly.sulphur_dioxide[idx] ?? aqiData.hourly.sulphur_dioxide[0] : null
+            };
+            for (const [name, value] of Object.entries(pollutants)) {
+                const card = document.createElement('div');
+                card.className = 'pollutant-card';
+                const displayValue = value !== null && value !== undefined ? value.toFixed(1) : 'N/A';
+                card.innerHTML = `<div class="pollutant-name">${name}</div><div class="pollutant-value">${displayValue}</div><div class="pollutant-unit">µg/m³</div>`;
+                grid.appendChild(card);
+            }
+        }
+
+        function renderHourlyForecast(weather) {
+            const grid = document.getElementById('hourlyGrid');
+            grid.innerHTML = '';
+            const hours = weather.hourly?.time || [];
+            const temps = weather.hourly?.temperature_2m || [];
+            const codes = weather.hourly?.weathercode || [];
+            for (let i = 0; i < Math.min(24, hours.length); i++) {
+                const item = document.createElement('div');
+                item.className = 'hourly-item';
+                const time = new Date(hours[i]).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                const tempC = temps[i];
+                const tempDisplay = tempC !== undefined ? convertTemp(tempC) : 'N/A';
+                item.innerHTML = `<div class="hourly-time">${time}</div><div class="hourly-icon">${getWeatherEmoji(codes[i])}</div><div class="hourly-temp">${tempDisplay}${getTempUnit()}</div>`;
+                grid.appendChild(item);
+            }
+        }
+
+        async function fetchData(lat, lon, locationName = '') {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('content').style.display = 'none';
+            const errorEl = document.getElementById('error');
+            const statusEl = document.getElementById('statusAnnounce');
+            if (statusEl) statusEl.textContent = 'Refreshing data…';
+            errorEl.style.display = 'none';
+
+            try {
+                // If no locationName provided, or the provided locationName looks like coordinates, try reverse-geocoding to a nicer label
+                // treat several coordinate-like formats as coordinates (plain "lat, lon" or "Lat: x, Lon: y")
+                const simpleCoordRegex = /^-?\d+\.?\d*,\s*-?\d+\.?\d*$/;
+                const labeledCoordRegex = /lat[:\s]*-?\d+\.?\d+[,;\s]+lon[:\s]*-?\d+\.?\d+/i;
+                if (!locationName || simpleCoordRegex.test(locationName) || labeledCoordRegex.test(locationName)) {
+                    try {
+                        console.debug('fetchData: attempting reverse geocode for', { lat, lon, locationName });
+                        const revUrl = `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lon}&count=1&language=en`;
+                        console.debug('fetchData reverse geocode url:', revUrl);
+                        const revRes = await fetch(revUrl, { mode: 'cors', redirect: 'follow' });
+                        if (revRes.ok) {
+                            const revData = await revRes.json();
+                            console.debug('fetchData reverse geocode result:', revData);
+                            let raw = null;
+                            if (revData && revData.results && revData.results[0]) {
+                                raw = revData.results[0];
+                                const nice = formatPlaceName(raw) || raw.display_name || raw.country || raw.name || '';
+                                if (nice) {
+                                    locationName = nice;
+                                } else {
+                                    console.warn('fetchData: reverse geocode returned no friendly name, revData:', raw);
+                                }
+                            } else {
+                                console.warn('fetchData: reverse geocode returned no results');
+                            }
+                            // populate debug panel when available
+                            const debugEl = document.getElementById('revGeoDebug');
+                            if (debugEl) debugEl.textContent = raw ? JSON.stringify(raw, null, 2) : (revData ? JSON.stringify(revData, null, 2) : 'No revData');
+                        } else {
+                            console.warn('fetchData reverse geocode failed:', revRes.status, revRes.statusText);
+                        }
+                    } catch (e) {
+                        console.error('fetchData reverse geocode error', e);
+                    }
+                }
+
+                const cacheKey = `${lat}_${lon}`;
+                // Load cached response data and get cache timestamps
+                let weather = loadResponseCache(`weather_${cacheKey}`);
+                let aqiData = loadResponseCache(`aqi_${cacheKey}`);
+                const weatherCacheInfo = getResponseCacheInfo(`weather_${cacheKey}`);
+                const aqiCacheInfo = getResponseCacheInfo(`aqi_${cacheKey}`);
+                if (weatherCacheInfo) { lastWeatherTs = weatherCacheInfo.ts; lastWeatherFromCache = true; }
+                if (aqiCacheInfo) { lastAqiTs = aqiCacheInfo.ts; lastAqiFromCache = true; }
+
+                if (!weather || !aqiData) {
+                    const weatherUrl = `${WEATHER_API}?latitude=${lat}&longitude=${lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode&hourly=temperature_2m,weathercode,relative_humidity_2m&timezone=auto&forecast_days=7`;
+                    const aqiUrl = `${AQI_API}?latitude=${lat}&longitude=${lon}&hourly=pm10,pm2_5,nitrogen_dioxide,ozone,sulphur_dioxide&timezone=auto`;
+
+                    // Fetch only what we need — don't fetch both endpoints if one is already cached
+                    const fetchPromises = [];
+                    if (!weather) fetchPromises.push(fetch(weatherUrl, { mode: 'cors', redirect: 'follow' }).then(res => { if (!res.ok) throw new Error(`Weather API error: ${res.status}`); return res.json().then(data => { weather = data; saveResponseCache(`weather_${cacheKey}`, weather); lastWeatherTs = Date.now(); lastWeatherFromCache = false; }); }));
+                    if (!aqiData) fetchPromises.push(fetch(aqiUrl, { mode: 'cors', redirect: 'follow' }).then(res => { if (!res.ok) throw new Error(`AQI API error: ${res.status}`); return res.json().then(data => { aqiData = data; saveResponseCache(`aqi_${cacheKey}`, aqiData); lastAqiTs = Date.now(); lastAqiFromCache = false; }); }));
+
+                    if (fetchPromises.length > 0) {
+                        await Promise.all(fetchPromises);
+                    }
+                    // If we fetched any data, update timestamps
+                    if (!weather && getResponseCacheInfo(`weather_${cacheKey}`)) {
+                        const wc = getResponseCacheInfo(`weather_${cacheKey}`);
+                        lastWeatherTs = wc.ts; lastWeatherFromCache = false; // fetched just now
+                    }
+                    if (!aqiData && getResponseCacheInfo(`aqi_${cacheKey}`)) {
+                        const ac = getResponseCacheInfo(`aqi_${cacheKey}`);
+                        lastAqiTs = ac.ts; lastAqiFromCache = false; // fetched just now
+                    }
+                }
+
+                displayData(weather, aqiData, locationName || `${lat.toFixed(2)}, ${lon.toFixed(2)}`);
+                updateFetchInfoDisplay();
+            } catch (err) {
+                // Detailed error reporting for debugging fetch failures
+                const online = typeof navigator !== 'undefined' ? (navigator.onLine ? 'online' : 'offline') : 'unknown';
+                const detailed = typeof err === 'object' ? (err.message || String(err)) : String(err);
+                const msg = `❌ Failed to load data (${detailed}). Network: ${online}. See console for details.`;
+                console.error('fetchData error', err, { lat, lon });
+                errorEl.textContent = msg;
+                errorEl.style.display = 'block';
+                if (statusEl) statusEl.textContent = msg;
+                // Also populate fetchInfo with debug details in dev mode
+                try { document.getElementById('fetchInfo').textContent = `Weather: ${lastWeatherTs ? formatTs(lastWeatherTs) : '—'} · AQI: ${lastAqiTs ? formatTs(lastAqiTs) : '—'} · Err: ${detailed}`; } catch(e) {}
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function displayData(weather, aqiData, locationName) {
+            document.getElementById('locationDisplay').textContent = locationName;
+            // Show exact coordinates as a subtitle for precision
+            const coordsEl = document.getElementById('locationCoords');
+            if (typeof currentLat === 'number' && typeof currentLon === 'number') {
+                coordsEl.textContent = `Lat: ${currentLat.toFixed(4)}, Lon: ${currentLon.toFixed(4)}`;
+            } else {
+                coordsEl.textContent = '';
+            }
+
+            const current = weather.current_weather || {};
+            const tempC = current.temperature;
+            const tempDisplay = tempC !== undefined ? convertTemp(tempC) : 'N/A';
+            document.getElementById('tempValue').textContent = tempDisplay !== 'N/A' ? `${tempDisplay}${getTempUnit()}` : 'N/A';
+            document.getElementById('windValue').textContent = current.windspeed !== undefined ? `${current.windspeed} km/h` : 'N/A';
+            const wcode = current.weathercode;
+            const wEmoji = getWeatherEmoji(wcode);
+            const wDesc = getWeatherDescription(wcode);
+            document.getElementById('weatherDesc').textContent = `${wEmoji} ${wDesc}`;
+
+            // Determine the nearest hourly index first (used by humidity/pollutants)
+            const idx = getCurrentHourIndex(weather);
+            let humidityText = 'N/A';
+            if (weather.hourly && weather.hourly.relative_humidity_2m && weather.hourly.relative_humidity_2m.length > 0) {
+                // Prefer the nearest hour index if available
+                const h = typeof idx === 'number' && weather.hourly.relative_humidity_2m[idx] !== undefined ? weather.hourly.relative_humidity_2m[idx] : weather.hourly.relative_humidity_2m[0];
+                humidityText = h !== undefined && h !== null ? `${h}%` : 'N/A';
+            }
+            document.getElementById('humidityValue').textContent = humidityText;
+
+            // (idx already defined above)
+            const pm25 = aqiData?.hourly?.pm2_5 ? aqiData.hourly.pm2_5[idx] : null;
+            const pm10 = aqiData?.hourly?.pm10 ? aqiData.hourly.pm10[idx] : null;
+            const aqi = pm25ToAqi(pm25) ?? 'N/A';
+            const category = typeof aqi === 'number' ? getAqiCategory(aqi) : aqiCategories[0];
+
+            const aqiCircle = document.getElementById('aqiCircle');
+            aqiCircle.textContent = typeof aqi === 'number' ? aqi : 'N/A';
+            aqiCircle.className = `aqi-circle ${category.color}`;
+            // Improve accessiblity for AQI circle
+            aqiCircle.setAttribute('role', 'img');
+            aqiCircle.setAttribute('aria-label', `AQI: ${typeof aqi === 'number' ? aqi : 'N/A'} — ${category.label}`);
+            document.getElementById('aqiValue').textContent = typeof aqi === 'number' ? `AQI: ${aqi}` : 'AQI: N/A';
+            document.getElementById('aqiCategory').textContent = category.label;
+            document.getElementById('pm25Value').textContent = pm25 !== null && pm25 !== undefined ? pm25.toFixed(1) : 'N/A';
+            document.getElementById('pm10Value').textContent = pm10 !== null && pm10 !== undefined ? pm10.toFixed(1) : 'N/A';
+
+            if (typeof aqi === 'number') {
+                highlightLegend(aqi);
+                renderHealthTips(aqi);
+            }
+
+            renderPollutants(aqiData, idx);
+            renderHourlyForecast(weather);
+
+            const forecastGrid = document.getElementById('forecastGrid');
+            forecastGrid.innerHTML = '';
+            const days = weather.daily?.time || [];
+            const tempsMax = weather.daily?.temperature_2m_max || [];
+            const tempsMin = weather.daily?.temperature_2m_min || [];
+            const precip = weather.daily?.precipitation_probability_max || [];
+            const codes = weather.daily?.weathercode || [];
+
+            for (let i = 0; i < days.length; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'forecast-day';
+
+                const dayName = document.createElement('div');
+                dayName.className = 'day-name';
+                dayName.textContent = new Date(days[i]).toLocaleDateString('en-US', { weekday: 'short' });
+
+                const icon = document.createElement('div');
+                icon.className = 'forecast-icon';
+                icon.textContent = getWeatherEmoji(codes[i]);
+
+                const tempRange = document.createElement('div');
+                tempRange.className = 'temp-range';
+                const minTemp = convertTemp(tempsMin[i]);
+                const maxTemp = convertTemp(tempsMax[i]);
+                tempRange.textContent = `${minTemp}° / ${maxTemp}°`;
+
+                const precipEl = document.createElement('div');
+                precipEl.className = 'precip';
+                precipEl.textContent = `${precip[i]}% precip`;
+
+                dayDiv.appendChild(dayName);
+                dayDiv.appendChild(icon);
+                dayDiv.appendChild(tempRange);
+                dayDiv.appendChild(precipEl);
+
+                forecastGrid.appendChild(dayDiv);
+            }
+
+            document.getElementById('content').style.display = 'block';
+            // Update last updated label and announce content for screen readers
+            const now = new Date();
+            const lastUpdatedEl = document.getElementById('lastUpdated');
+            if (lastUpdatedEl) lastUpdatedEl.textContent = `Last updated: ${now.toLocaleString()}`;
+            // ARIA live region: status announce
+            const statusEl = document.getElementById('statusAnnounce');
+            if (statusEl) {
+                const aqiText = typeof aqi === 'number' ? `${aqi} (${category.label})` : 'N/A';
+                statusEl.textContent = `Updated for ${locationName}. AQI ${aqiText}. Temperature ${tempDisplay}${getTempUnit()}.`;
+            }
+        }
+
+        function getWeatherEmoji(code) {
+            const emojis = {
+                0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️', 45: '🌫️', 48: '🌫️',
+                51: '🌦️', 53: '🌦️', 55: '🌧️', 61: '🌧️', 63: '🌧️', 65: '⛈️',
+                71: '🌨️', 73: '🌨️', 75: '❄️', 80: '🌦️', 81: '🌦️', 82: '🌧️', 95: '⛈️', 99: '⛈️'
+            };
+            return emojis[code] || '🌤️';
+        }
+
+        function getWeatherDescription(code) {
+            const desc = {
+                0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
+                45: 'Fog', 48: 'Depositing rime fog',
+                51: 'Light drizzle', 53: 'Moderate drizzle', 55: 'Dense drizzle',
+                61: 'Slight rain', 63: 'Moderate rain', 65: 'Heavy rain',
+                71: 'Slight snow', 73: 'Moderate snow', 75: 'Heavy snow',
+                80: 'Rain showers', 81: 'Moderate showers', 82: 'Violent showers',
+                95: 'Thunderstorm', 99: 'Hail'
+            };
+            return desc[code] || 'Partly cloudy';
+        }
+
+        async function loadData() {
+            const city = document.getElementById('cityInput').value.trim();
+            if (!city) return;
+
+            try {
+                const cached = loadGeocodeCache(city);
+                let latitude, longitude, name;
+                if (cached) {
+                    ({ latitude, longitude, name } = cached);
+                } else {
+                    const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en`, { mode: 'cors', redirect: 'follow' });
+                    if (!geoRes.ok) throw new Error('Geocoding error');
+                    const geoData = await geoRes.json();
+                    if (geoData.results && geoData.results[0]) {
+                            ({ latitude, longitude } = geoData.results[0]);
+                            const formatted = formatPlaceName(geoData.results[0]) || geoData.results[0].name || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+                            name = formatted;
+                            saveGeocodeCache(city, { latitude, longitude, name });
+                    } else {
+                        throw new Error('City not found');
+                    }
+                }
+
+                currentLat = latitude; currentLon = longitude;
+                await fetchData(latitude, longitude, name);
+            } catch (error) {
+                const err = document.getElementById('error');
+                const msg = error?.message || String(error) || 'Unknown error';
+                err.textContent = `❌ City search failed: ${msg}. Please check spelling or try again.`;
+                err.style.display = 'block';
+                console.error('loadData error', error);
+            }
+        }
+
+        function getCurrentLocation() {
+            if (!navigator.geolocation) {
+                const err = document.getElementById('error');
+                err.textContent = '⚠️ Geolocation not supported by this browser.';
+                err.style.display = 'block';
+                return;
+            }
+
+            const options = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                currentLat = position.coords.latitude;
+                currentLon = position.coords.longitude;
+                // Show resolving UI while we try to get a friendly place name
+                const locEl = document.getElementById('locationDisplay');
+                const coordsEl = document.getElementById('locationCoords');
+                locEl.textContent = 'Resolving place…';
+                coordsEl.textContent = `Lat: ${currentLat.toFixed(4)}, Lon: ${currentLon.toFixed(4)}`;
+
+                // Try reverse geocoding to get a human-friendly location name
+                try {
+                    const revUrl = `https://geocoding-api.open-meteo.com/v1/reverse?latitude=${currentLat}&longitude=${currentLon}&count=1&language=en`;
+                    console.debug('Reverse geocode URL:', revUrl);
+                    const revRes = await fetch(revUrl, { mode: 'cors', redirect: 'follow' });
+                    if (revRes.ok) {
+                        const revData = await revRes.json();
+                        console.debug('Reverse geocode result:', revData);
+                        let name = '';
+                        let raw = null;
+                        if (revData && revData.results && revData.results[0]) {
+                            const r = revData.results[0];
+                            raw = r;
+                            // Try the friendly formatter first, then display_name, then country
+                            name = formatPlaceName(r) || r.display_name || r.country || r.name || `${r.latitude.toFixed(4)}, ${r.longitude.toFixed(4)}`;
+                        }
+                        // populate debug panel
+                        const debugEl = document.getElementById('revGeoDebug');
+                        if (debugEl) {
+                            debugEl.textContent = raw ? JSON.stringify(raw, null, 2) : (revData ? JSON.stringify(revData, null, 2) : 'No revData');
+                        }
+                        if (!name) name = `${currentLat.toFixed(4)}, ${currentLon.toFixed(4)}`;
+                        await fetchData(currentLat, currentLon, name);
+                        return;
+                    } else {
+                        console.warn('Reverse geocode fetch failed:', revRes.status, revRes.statusText);
+                    }
+                } catch (e) {
+                    console.error('Reverse geocode error', e);
+                }
+
+                // Fallback: use coordinates as label
+                await fetchData(currentLat, currentLon, `${currentLat.toFixed(4)}, ${currentLon.toFixed(4)}`);
+            }, (err) => {
+                const el = document.getElementById('error');
+                if (err.code === err.PERMISSION_DENIED) el.textContent = '❌ Location access denied. Please enable location services.';
+                else el.textContent = '❌ Unable to retrieve location. Try again.';
+                el.style.display = 'block';
+            }, options);
+        }
+
+        function openSettings() {
+            document.getElementById('settingsOverlay').style.display = 'block';
+            document.getElementById('settingsPanel').style.display = 'block';
+            document.getElementById('unitSelect').value = tempUnit;
+            document.getElementById('refreshSelect').value = autoRefreshInterval;
+            document.getElementById('themeSelect').value = theme;
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsOverlay').style.display = 'none';
+            document.getElementById('settingsPanel').style.display = 'none';
+        }
+
+        function saveSettings() {
+            tempUnit = document.getElementById('unitSelect').value;
+            const newInterval = parseInt(document.getElementById('refreshSelect').value, 10);
+            autoRefreshInterval = newInterval;
+            theme = document.getElementById('themeSelect').value;
+            localStorage.setItem('appSettings', JSON.stringify({ tempUnit, autoRefreshInterval, theme }));
+            closeSettings();
+            clearInterval(refreshIntervalId);
+            if (autoRefreshInterval > 0) {
+                refreshIntervalId = setInterval(() => {
+                    if (currentLat !== null && currentLon !== null) {
+                        // pass empty label so fetchData will attempt reverse-geocoding and generate a friendly name
+                        fetchData(currentLat, currentLon, '');
+                    }
+                }, autoRefreshInterval);
+            }
+            if (currentLat !== null && currentLon !== null) {
+                fetchData(currentLat, currentLon, document.getElementById('locationDisplay').textContent);
+            }
+        }
+
+        function loadSettings() {
+            try {
+                const saved = localStorage.getItem('appSettings');
+                if (saved) {
+                    const obj = JSON.parse(saved);
+                    tempUnit = obj.tempUnit || 'C';
+                    autoRefreshInterval = obj.autoRefreshInterval || 300000;
+                    theme = obj.theme || 'light';
+                }
+            } catch (e) { }
+        }
+
+        // Toggle the reverse-geocode debug panel
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggle = document.getElementById('revGeoToggle');
+            const debugEl = document.getElementById('revGeoDebug');
+            if (toggle && debugEl) {
+                toggle.addEventListener('click', () => {
+                    const expanded = toggle.getAttribute('aria-expanded') === 'true';
+                    if (expanded) {
+                        debugEl.style.display = 'none';
+                        toggle.setAttribute('aria-expanded', 'false');
+                        toggle.textContent = 'Show geocode';
+                        debugEl.setAttribute('aria-hidden', 'true');
+                    } else {
+                        debugEl.style.display = 'block';
+                        toggle.setAttribute('aria-expanded', 'true');
+                        toggle.textContent = 'Hide geocode';
+                        debugEl.setAttribute('aria-hidden', 'false');
+                    }
+                });
+            }
+        });
+
+        // Initialize
+        loadSettings();
+        renderLegend();
+
+        const debouncedLoad = debounce(loadData, 550);
+        document.getElementById('searchBtn').addEventListener('click', () => loadData());
+        document.getElementById('cityInput').addEventListener('input', debouncedLoad);
+        document.getElementById('cityInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') loadData(); });
+        document.getElementById('locBtn').addEventListener('click', () => getCurrentLocation());
+        document.getElementById('settingsBtn').addEventListener('click', () => openSettings());
+        document.getElementById('toggleTips').addEventListener('click', () => toggleHealthTips());
+        const refreshBtn = document.getElementById('refreshBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                if (currentLat !== null && currentLon !== null) {
+                    fetchData(currentLat, currentLon, '');
+                } else {
+                    // If current coordinates are not known, trigger a city load (if a city is specified)
+                    const city = document.getElementById('cityInput')?.value?.trim();
+                    if (city) loadData();
+                }
+            });
+        }
+
+        window.addEventListener('load', () => loadData());
+        
+        if (autoRefreshInterval > 0) {
+            refreshIntervalId = setInterval(() => {
+                if (currentLat !== null && currentLon !== null) {
+                        fetchData(currentLat, currentLon, '');
+                }
+            }, autoRefreshInterval);
+        }
+
+        // Global error handlers to help identify why client fetches fail
+        window.addEventListener('error', (ev) => {
+            try {
+                console.error('Global error event:', ev.error || ev.message || ev);
+                const errEl = document.getElementById('error');
+                if (errEl) { errEl.textContent = 'Unexpected error: ' + (ev.error?.message || ev.message || String(ev)); errEl.style.display = 'block'; }
+            } catch (e) { console.error('error event handler failed', e); }
+        });
+        window.addEventListener('unhandledrejection', (ev) => {
+            try {
+                console.error('Unhandled promise rejection:', ev.reason);
+                const errEl = document.getElementById('error');
+                if (errEl) { errEl.textContent = 'Async error: ' + (ev.reason?.message || String(ev.reason)); errEl.style.display = 'block'; }
+            } catch(e) { console.error('unhandledrejection handler failed', e); }
+        });
+    </script>
+</body>
+</html>
